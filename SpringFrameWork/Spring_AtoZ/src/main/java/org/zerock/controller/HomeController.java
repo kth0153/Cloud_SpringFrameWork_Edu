@@ -40,7 +40,11 @@ public class HomeController {
 		
 		model.addAttribute("serverTime", formattedDate );
 		
-		return "home";
+//		viewResolver에서 두 가지 정보를 사용해서 view 페이지 정보를 완성
+//		<beans:property name="prefix" value="/WEB-INF/views/" />
+//		<beans:property name="suffix" value=".jsp" />
+		
+		return "home"; // preFix
 	}
 	
 }
