@@ -29,6 +29,13 @@ public class BoardController {
 		model.addAttribute("list",service.getList());	
 	}
 	
+	// 화면에서 입력받기 위해 Get 방식으로 매핑
+	// 보여주는 역할만 하기 때문에 별도의 처리가 필요하지 않음
+	@GetMapping("/register")
+	public void register() {
+		
+	}
+	
 	@PostMapping("/register")
 	public String register(BoardVO board, RedirectAttributes rttr) {
 		log.info("register : " + board);
@@ -37,9 +44,9 @@ public class BoardController {
 		return "redirect:/board/list";
 	}
 	
-	@GetMapping("/get")
+	@GetMapping({"/get","/modify"})
 	public void get(@RequestParam("bno") Long bno, Model model) {
-		log.info("/get");
+		log.info("/get or modify");
 		model.addAttribute("board",service.get(bno));
 	}
 	
@@ -55,6 +62,7 @@ public class BoardController {
 	
 	@PostMapping("/remove")
 	public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr) {
+
 		log.info("remove : " + bno);
 		if(service.remove(bno)) {
 			rttr.addFlashAttribute("result","success");
