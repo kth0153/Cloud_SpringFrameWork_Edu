@@ -3,12 +3,15 @@ package com.org.zerock.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.org.zerock.domain.BoardVO;
+import com.org.zerock.domain.Criteria;
+import com.org.zerock.domain.PageDTO;
 import com.org.zerock.service.BoardService;
 
 import lombok.AllArgsConstructor;
@@ -22,11 +25,23 @@ public class BoardController {
 	
 	private BoardService service;
 
+//	@GetMapping("/list") // void일 경우 path가 포워딩되는 jsp가 됨
+//	public void list(Model model) {
+//		log.info("/list");
+//		// /list.jsp로 포워딩시 데이터를 전달하기 위해서 Model에 바인딩 시킴
+//		model.addAttribute("list",service.getList());	
+//	}
+	
 	@GetMapping("/list") // void일 경우 path가 포워딩되는 jsp가 됨
-	public void list(Model model) {
-		log.info("/list");
+	public void list(Criteria cri, Model model) {
+		log.info("list : " + cri);
 		// /list.jsp로 포워딩시 데이터를 전달하기 위해서 Model에 바인딩 시킴
-		model.addAttribute("list",service.getList());	
+		model.addAttribute("list",service.getList(cri));	
+		model.addAttribute("pageMaker",new PageDTO(cri, 123));
+		
+		int total = service.getTotalCount(cri);
+		log.info("total : " + total);
+		model.addAttribute("pageMaker",new PageDTO(cri, total));
 	}
 	
 	// 화면에서 입력받기 위해 Get 방식으로 매핑
@@ -45,29 +60,38 @@ public class BoardController {
 	}
 	
 	@GetMapping({"/get","/modify"})
-	public void get(@RequestParam("bno") Long bno, Model model) {
+	public void get(@RequestParam("bno") Long bno,@ModelAttribute("cri") Criteria cri, Model model) {
 		log.info("/get or modify");
 		model.addAttribute("board",service.get(bno));
 	}
 	
-	@PostMapping("modify")
-	public String modify(BoardVO board, RedirectAttributes rttr) {
+	@PostMapping("/modify")
+	public String modify(BoardVO board, RedirectAttributes rttr, @ModelAttribute("cri") Criteria cri) {
 		log.info("modify : " + board);
 		
 		if(service.modify(board)) {
 			rttr.addFlashAttribute("result","success");
 		}
-		return "redirect:/board/list";
+//		rttr.addAttribute("pageNum",cri.getPageNum());
+//		rttr.addAttribute("amount",cri.getAmount());
+//		rttr.addAttribute("type",cri.getType());
+//		rttr.addAttribute("keyword",cri.getKeyword());
+
+		return "redirect:/board/list" + cri.getListeLink();
 	}
 	
 	@PostMapping("/remove")
-	public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr) {
+	public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr, @ModelAttribute("cri") Criteria cri) {
 
 		log.info("remove : " + bno);
 		if(service.remove(bno)) {
 			rttr.addFlashAttribute("result","success");
 		}
-		return "redirect:/board/list";
+//		rttr.addAttribute("pageNum",cri.getPageNum());
+//		rttr.addAttribute("amount",cri.getAmount());
+//		rttr.addAttribute("type",cri.getType());
+//		rttr.addAttribute("keyword",cri.getKeyword());
+		return "redirect:/board/list" + cri.getListeLink();
 	}
 	
 }

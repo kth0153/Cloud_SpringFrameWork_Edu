@@ -7,6 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.org.zerock.domain.BoardVO;
+import com.org.zerock.domain.Criteria;
 
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -30,9 +31,14 @@ public class BoardServiceTest {
 		log.info("등록된 게시글 : " + board);
 	}
 	
+//	@Test
+//	public void testGetList() {
+//		service.getList().forEach(board -> log.info(board));
+//	}
+	
 	@Test
 	public void testGetList() {
-		service.getList().forEach(board -> log.info(board));
+		service.getList(new Criteria(2,10)).forEach(board -> log.info(board));
 	}
 	
 	@Test
