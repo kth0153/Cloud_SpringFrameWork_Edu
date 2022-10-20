@@ -93,24 +93,7 @@
 	</div>
 
 	</div>
-       <!-- /.panel-heading -->
-      <div class="panel-body">        
-      
- 		<ul class="chat">
-      	<!-- start reply -->
-      	<il class="left clearfix" data-rno='61'>
-      	<div>
-      		<div class="header">
-      			<strong class="primary-font">user00</strong>
-      			<small class="pull-right text-muted">2022-10-19 10:10</small>
-      		</div>
-      		<p>Good job!</p>
-      	</div>
-      	</il>
-      	<!-- end reply -->
-      </ul>
-      <!-- ./end ul -->
-     </div>
+
       <!-- /.panel .chat-panel -->
 <!--     </div>
    </div>

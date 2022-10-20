@@ -33,11 +33,13 @@
 <!-- 페이징 처리 -->
 <select id="getListWithPaging" resultType="org.zerock.domain.BoardVO">
 	<![CDATA[
-		select bno,title,content,writer,regdate,updatedate
+		select 
+			bno,title,content,writer,regdate,updatedate,replycnt
 		from (
 			select /*+INDEX_DESC(tb1_board pk_board)*/ 
-		    rownum rn, bno, title, content,writer,regdate,updatedate
-		    from tb1_board
+		    rownum rn, bno, title, content,writer,regdate,updatedate,replycnt
+		    from 
+		    	tb1_board
 		    where 
 		    
 		]]>
@@ -85,5 +87,9 @@
 	writer=#{writer},
 	updateDate=sysdate
 	where bno=#{bno}
+</update>
+
+<update id="updateReplyCnt">
+	update tb1_board set replycnt = replycnt + #{amount} where bno = #{bno}
 </update>
 </mapper>
