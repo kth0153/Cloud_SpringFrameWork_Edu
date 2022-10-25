@@ -2,15 +2,104 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:security="http://www.springframework.org/schema/security"
-	xsi:schemaLocation="http://www.springframework.org/schema/security 
-						http://www.springframework.org/schema/security/spring-security.xsd
-						http://www.springframework.org/schema/beans 
-						http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+						
+	
+	<bean id="customAccessDenied" class="org.zerock.security.CustomAccessDeniedHandler"></bean>
+	<bean id="customLoginSuccess" class="org.zerock.security.CustomLoginSuccessHandler"></bean>
+	<!-- <bean id='customPasswordEncoder' class="org.zerock.security.CustomNoOpPasswordEncoder"></bean> -->
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+	
+	<bean id="customUserDetailsService" class="org.zerock.security.CustomUserDetailsService"></bean>
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<!-- Connection Pool 설정을 위한 히카리CP 설정 -->
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+	<!-- 기존 JDBC 설정 -->
+    <!-- <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+    <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"/> -->
+    
+    <!-- log4jdbc-log4j2 설정 -->
+    <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+    <property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:XE"/>
+    <property name="username" value="book_ex" />
+    <property name="password" value="book_ex" />
+	</bean>
+	
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+	    <constructor-arg ref="hikariConfig" />
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<bean id ="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	
+	<!-- <security:http auto-config="true" use-expressions="true"> -->
 	<security:http>
-		<security:form-login/>
+		<security:intercept-url pattern="/sample/all" access="permitAll"/>
+		
+		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')"/>
+		
+		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')"/>
+		
+		<!-- <security:form-login/> -->
+		<security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess" />
+		
+		<!-- logout -->
+		<security:logout logout-url="/customLogout" invalidate-session="true"/>
+		
+		<!-- <security:access-denied-handler error-page="/accessError"/> -->
+		<security:access-denied-handler ref="customAccessDenied"/>
+		
 	</security:http>
 	
+	<!-- <security:csrf disabled="true"/> -->
+	
 	<security:authentication-manager>
+
+	<security:authentication-provider user-service-ref="customUserDetailsService">
+	
+		<!-- <security:user-service>
+			<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER"/>
+			
+			<security:user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN"/>
+		</security:user-service> -->
+		
+	<!-- <security:jdbc-user-service data-source-ref="dataSource"/> -->
+	<!-- <security:jdbc-user-service data-source-ref="dataSource" 
+								users-by-username-query="select userid,userpw,enabled from tbl_member where userid = ?"
+								authorities-by-username-query="select userid, auth from tbl_member_auth where userid = ?"/>  -->
+	
+	<security:password-encoder ref="bcryptPasswordEncoder" />
+	</security:authentication-provider>
+	
 	</security:authentication-manager>
+	
+	  
+	
+	<context:component-scan base-package="org.zerock.security"></context:component-scan>
+	
+	<context:annotation-config></context:annotation-config>
+	<context:component-scan base-package="org.zerock"></context:component-scan>
+	
+	<mybatis-spring:scan base-package="org.zerock.mapper"/>	
+	<context:component-scan base-package="org.zerock.service"></context:component-scan>
+	<!-- <context:component-scan base-package="org.zerock.security"></context:component-scan> -->
 
 </beans>

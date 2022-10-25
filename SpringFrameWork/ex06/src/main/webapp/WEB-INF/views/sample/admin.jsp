@@ -4,9 +4,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>/sample/admin page</title>
 </head>
 <body>
 	<h1>/sample/admin page</h1>
+	<a href="/customLogout">Logout</a>
 </body>
 </html>
